@@ -32,43 +32,18 @@ import com.example.ticktingsystem.DataModel.VehicleData
 import com.example.ticktingsystem.R
 import com.example.ticktingsystem.utills.Spacing.MainColor
 import com.example.ticktingsystem.utills.Spacing.Spacers
+import com.example.ticktingsystem.utills.Spacing.dataList
 
 
 @Preview
 @Composable
 fun ChooseVehiclesScreen() {
-
-    val list = listOf(
-        VehicleData("Car", R.drawable.car),
-        VehicleData("Coach/Bus", R.drawable.bus),
-        VehicleData("Flying Coach", R.drawable.flying_coach),
-        VehicleData("Jeep", R.drawable.jeep),
-        VehicleData("Truck", R.drawable.truck),
-        VehicleData("Pickup", R.drawable.pickup),
-        VehicleData("Bike", R.drawable.motorcycle),
-        VehicleData("Riksha", R.drawable.riksha),
-        VehicleData("Van/APV", R.drawable.van),
-        VehicleData("Trailer", R.drawable.trailer),
-        VehicleData("Oil Carrier", R.drawable.oil_tanker),
-        VehicleData("Car Carrier", R.drawable.car_carrier),
-        VehicleData("Dumper", R.drawable.dumper),
-        VehicleData("Gas Bowser", R.drawable.gas),
-        VehicleData("Crane", R.drawable.crane),
-        VehicleData("Harvester", R.drawable.harvester),
-        VehicleData("Milk Tanker", R.drawable.milk),
-        VehicleData("Tractor", R.drawable.tracktor),
-        VehicleData("Bike Carrier", R.drawable.bike_carrier),
-        VehicleData("Pedestrian", R.drawable.walk),
-        VehicleData("Water Bowser", R.drawable.water_tank),
-        VehicleData("Animal Drawn Vehicle", R.drawable.animal)
-
-    )
     Scaffold { innerPadding->
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)){
             LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 90.dp)) {
-                items(list) {
+                items(dataList) {
                     GridItem(it.name,it.image)
                 }
             }
@@ -82,7 +57,7 @@ fun GridItem(name: String, image: Int) {
         Column(modifier = Modifier.fillMaxWidth().padding(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Image(painterResource(image), contentDescription = "", colorFilter = ColorFilter.tint(MainColor), modifier = Modifier.size(40.dp))
             Spacers(8,"h")
-            Text(text = name, color = Color.Gray, fontSize = 13.sp, textAlign = TextAlign.Center)
+            Text(text = name, color = Color.Gray, fontSize = 12.sp, textAlign = TextAlign.Center)
         }
     }
 
