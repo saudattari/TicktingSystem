@@ -1,4 +1,9 @@
 package com.example.ticktingsystem.Screens
 
-class InputFormScreen {
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun InputFormScreen(modifier: Modifier = Modifier) {
+
 }

@@ -11,6 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import com.example.ticktingsystem.Navigation.ScreensNavigation
 import com.example.ticktingsystem.ui.theme.TicktingSystemTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,6 +21,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TicktingSystemTheme {
+                val navController = rememberNavController()
+                ScreensNavigation(navController)
             }
         }
     }

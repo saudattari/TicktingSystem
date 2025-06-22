@@ -1,4 +1,9 @@
 package com.example.ticktingsystem.Screens
 
-class OutputScreen {
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun OutputScreen() {
+
 }

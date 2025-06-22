@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,34 +37,37 @@ import com.example.ticktingsystem.utills.Spacing.Spacers
 @Preview
 @Composable
 fun ChooseVehiclesScreen() {
+
     val list = listOf(
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
-        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("Car", R.drawable.car),
+        VehicleData("Coach/Bus", R.drawable.bus),
+        VehicleData("Flying Coach", R.drawable.flying_coach),
+        VehicleData("Jeep", R.drawable.jeep),
+        VehicleData("Truck", R.drawable.truck),
+        VehicleData("Pickup", R.drawable.pickup),
+        VehicleData("Bike", R.drawable.motorcycle),
+        VehicleData("Riksha", R.drawable.riksha),
+        VehicleData("Van/APV", R.drawable.van),
+        VehicleData("Trailer", R.drawable.trailer),
+        VehicleData("Oil Carrier", R.drawable.oil_tanker),
+        VehicleData("Car Carrier", R.drawable.car_carrier),
+        VehicleData("Dumper", R.drawable.dumper),
+        VehicleData("Gas Bowser", R.drawable.gas),
+        VehicleData("Crane", R.drawable.crane),
+        VehicleData("Harvester", R.drawable.harvester),
+        VehicleData("Milk Tanker", R.drawable.milk),
+        VehicleData("Tractor", R.drawable.tracktor),
+        VehicleData("Bike Carrier", R.drawable.bike_carrier),
+        VehicleData("Pedestrian", R.drawable.walk),
+        VehicleData("Water Bowser", R.drawable.water_tank),
+        VehicleData("Animal Drawn Vehicle", R.drawable.animal)
 
     )
     Scaffold { innerPadding->
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)){
-            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 128.dp)) {
+            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 90.dp)) {
                 items(list) {
                     GridItem(it.name,it.image)
                 }
@@ -74,11 +78,11 @@ fun ChooseVehiclesScreen() {
 
 @Composable
 fun GridItem(name: String, image: Int) {
-    Card(modifier = Modifier.size(height = 120.dp, width = 60.dp).padding(8.dp), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), colors = CardDefaults.cardColors(Color.White)) {
-        Column(modifier = Modifier.fillMaxWidth().padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Card(modifier = Modifier.size(height = 120.dp, width = 40.dp).padding(horizontal = 4.dp, vertical = 14.dp), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), colors = CardDefaults.cardColors(Color.White)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Image(painterResource(image), contentDescription = "", colorFilter = ColorFilter.tint(MainColor), modifier = Modifier.size(40.dp))
-            Spacers(12,"h")
-            Text(text = name, color = Color.Gray, fontSize = 15.sp)
+            Spacers(8,"h")
+            Text(text = name, color = Color.Gray, fontSize = 13.sp, textAlign = TextAlign.Center)
         }
     }
 

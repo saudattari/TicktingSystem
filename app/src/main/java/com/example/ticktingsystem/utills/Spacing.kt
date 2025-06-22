@@ -19,7 +19,7 @@ object Spacing {
         }
     }
 
-    val MainColor = Color(0xFF222777)
+    val MainColor = Color(0xFF161C88)
 
 
 
