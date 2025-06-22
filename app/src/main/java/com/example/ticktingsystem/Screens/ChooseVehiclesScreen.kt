@@ -37,7 +37,27 @@ import com.example.ticktingsystem.utills.Spacing.Spacers
 @Composable
 fun ChooseVehiclesScreen() {
     val list = listOf(
-        VehicleData("Car", R.drawable.traffic_car)
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+        VehicleData("MotorCycle", R.drawable.traffic_car),
+
     )
     Scaffold { innerPadding->
         Box(modifier = Modifier
@@ -54,11 +74,11 @@ fun ChooseVehiclesScreen() {
 
 @Composable
 fun GridItem(name: String, image: Int) {
-    Card(modifier = Modifier.size(height = 110.dp, width = 60.dp).padding(8.dp), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), colors = CardDefaults.cardColors(Color.White)) {
-        Column(modifier = Modifier.fillMaxWidth().padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Image(painterResource(image), contentDescription = "", colorFilter = ColorFilter.tint(MainColor), modifier = Modifier.size(30.dp))
+    Card(modifier = Modifier.size(height = 120.dp, width = 60.dp).padding(8.dp), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), colors = CardDefaults.cardColors(Color.White)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(painterResource(image), contentDescription = "", colorFilter = ColorFilter.tint(MainColor), modifier = Modifier.size(40.dp))
             Spacers(12,"h")
-            Text(text = name, color = Color.Gray, fontSize = 16.sp)
+            Text(text = name, color = Color.Gray, fontSize = 15.sp)
         }
     }
 
