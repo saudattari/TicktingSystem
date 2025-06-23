@@ -1,10 +1,13 @@
 package com.example.ticktingsystem.Screens
 
+import android.Manifest
 import android.app.Application
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,10 +16,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BasicAlertDialog
@@ -24,36 +31,44 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ticktingsystem.DataModel.Offense
 import com.example.ticktingsystem.DataModel.TicketData
 import com.example.ticktingsystem.PrinterSetup.TicketPdfGenerator.previewTicketAsPdf
-import com.example.ticktingsystem.PrinterSetup.TicketPrinter
 import com.example.ticktingsystem.ViewModel.TicketViewModel
 import com.example.ticktingsystem.ViewModel.ViewModelFactory
 import com.example.ticktingsystem.utills.Spacing.HrLine
 import com.example.ticktingsystem.utills.Spacing.MainColor
 import com.example.ticktingsystem.utills.Spacing.Spacers
 import com.example.ticktingsystem.utills.Spacing.bold
+import com.example.ticktingsystem.utills.Spacing.btnColor
+import com.example.ticktingsystem.utills.Spacing.offenseList
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -75,8 +90,85 @@ fun InputFormScreen(vehicle1: String) {
     var vehicle by rememberSaveable { mutableStateOf(vehicle1)  }
     var officerName by rememberSaveable { mutableStateOf("")  }
     var isSubmitted by rememberSaveable { mutableStateOf(false)  }
+    var selectedViolations by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
+    var fineTotal by rememberSaveable { mutableStateOf(0) }
+    var vehicleRegistration by rememberSaveable { mutableStateOf("") }
+    var showOffenseDialog by remember { mutableStateOf(false) }
+    var showCustomPenaltyDialog by remember { mutableStateOf<Offense?>(null) }
+    var licenceSelectedOptions by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
+    var expanded by rememberSaveable { mutableStateOf(false) }
     val viewModel: TicketViewModel = viewModel(factory = ViewModelFactory(context.applicationContext as Application))
+
+    if (showOffenseDialog) {
+        AlertDialog(
+            onDismissRequest = { showOffenseDialog = false },
+            title = { Text("Select Offense") },
+            text = {
+                LazyColumn {
+                    items(offenseList) { offense ->
+                        Text(
+                            "${offense.code} ${offense.title} - ${offense.description} (${offense.minPenalty}${if (offense.minPenalty != offense.maxPenalty) "–${offense.maxPenalty}" else ""})",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    if (offense.minPenalty != offense.maxPenalty) {
+                                        showCustomPenaltyDialog = offense
+                                    } else {
+                                        selectedViolations = selectedViolations + "${offense.code} ${offense.title} - ${offense.description} (${offense.minPenalty})"
+                                        fineTotal += offense.minPenalty
+                                    }
+                                    showOffenseDialog = false
+                                }
+                                .padding(8.dp)
+                        )
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {}
+        )
+    }
+    if (showCustomPenaltyDialog != null) {
+        var customAmount by remember { mutableStateOf("") }
+
+        AlertDialog(
+            onDismissRequest = { showCustomPenaltyDialog = null },
+            title = { Text("Enter Custom Penalty") },
+            text = {
+                Column {
+                    Text("Offense: ${showCustomPenaltyDialog!!.title} - ${showCustomPenaltyDialog!!.description}")
+                    OutlinedTextField(
+                        value = customAmount,
+                        onValueChange = { customAmount = it },
+                        label = { Text("Penalty Amount (${showCustomPenaltyDialog!!.minPenalty}-${showCustomPenaltyDialog!!.maxPenalty})") },
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val amount = customAmount.toIntOrNull()
+                    val offense = showCustomPenaltyDialog!!
+                    if (amount != null && amount in offense.minPenalty..offense.maxPenalty) {
+                        selectedViolations = selectedViolations + "${offense.code} ${offense.title} - ${offense.description} (${amount})"
+                        fineTotal += amount
+                        showCustomPenaltyDialog = null
+                    }
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCustomPenaltyDialog = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+
+
 
     if(isSubmitted){
         val randomFourDigit = (1000..9999).random()
@@ -143,11 +235,12 @@ fun InputFormScreen(vehicle1: String) {
                         Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.End) {
                             TextButton(onClick = { isSubmitted = false }) { Text("Cancel", color = MainColor) }
                             Spacer(modifier = Modifier.width(8.dp))
-                            TextButton(onClick = @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) {
+                            TextButton(onClick = @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT) {
                                 isSubmitted = false;
                                 viewModel.insertTicket(ticketData);
                                 previewTicketAsPdf(context, ticketData)
-                                TicketPrinter.printTicket(context, ticketData) }) { Text("OK", color = MainColor) }
+//                                TicketPrinter.printTicket(context, ticketData)
+                            }) { Text("OK", color = MainColor) }
                         }
                     }
                 }
@@ -165,7 +258,11 @@ fun InputFormScreen(vehicle1: String) {
                             Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(checked = true, onCheckedChange = {}, colors = CheckboxDefaults.colors(checkedColor = MainColor));Text(text = "CNIC") }
                             Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(checked = true, onCheckedChange = {}, colors = CheckboxDefaults.colors(checkedColor = MainColor));Text(text = "Licence") }
                         }
-                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value =CNIC, onValueChange = {CNIC = formatCNIC(it) }, isError = CNIC.isNotEmpty() && !isValidCNIC(CNIC), label = {Text(text = "CNIC*")}, modifier = Modifier.fillMaxWidth())
+                        Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween){
+                            OutlinedTextField(shape = RoundedCornerShape(12.dp), value =CNIC, onValueChange = {CNIC = formatCNIC(it) }, isError = CNIC.isNotEmpty() && !isValidCNIC(CNIC), label = {Text(text = "CNIC*")}, modifier = Modifier.weight(1.8f).padding(2.dp))
+                            Box(modifier = Modifier.size(height = 58.dp, width = 45.dp).weight(0.7f).padding(1.dp).background(brush = Brush.linearGradient(btnColor), shape = RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center){ Text(text = "Scan", color = Color.White)}
+                            Box(modifier = Modifier.size(height = 58.dp, width = 45.dp).weight(0.7f).padding(1.dp).background(brush = Brush.linearGradient(btnColor), shape = RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center){ Text(text = "Verify",color = Color.White)}
+                        }
                         Spacers(12,"h")
                         Row (verticalAlignment = Alignment.CenterVertically){
                             OutlinedTextField(shape = RoundedCornerShape(12.dp),
@@ -187,13 +284,50 @@ fun InputFormScreen(vehicle1: String) {
                         Spacers(12,"h")
                         OutlinedTextField(shape = RoundedCornerShape(12.dp), value =contactNumber , onValueChange = {contactNumber = it}, label = {Text(text = "Contact Number*")}, modifier = Modifier.fillMaxWidth())
                         Spacers(12,"h")
-                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value =location, onValueChange = {location = it}, label = {Text(text = "Location*")}, modifier = Modifier.fillMaxWidth())
+                        Row (modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
+                            Row(verticalAlignment = Alignment.CenterVertically) { RadioButton(selected = true, onClick = {}); Text(text = "Male") }
+                            Row (verticalAlignment = Alignment.CenterVertically){ RadioButton(selected = false, onClick = {}); Text(text = "Female") }
+                            Row(verticalAlignment = Alignment.CenterVertically) { RadioButton(selected = false, onClick = {}); Text(text = "Other") }
+                        }
                         Spacers(12,"h")
-                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value =modeOfPayment , onValueChange = {modeOfPayment = it}, label = {Text(text = "Mode Of Payment")}, modifier = Modifier.fillMaxWidth())
+                        Row (modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
+                            Row(verticalAlignment = Alignment.CenterVertically) { RadioButton(selected = true, onClick = {}); Text(text = "Driver") }
+                            Row (verticalAlignment = Alignment.CenterVertically){ RadioButton(selected = false, onClick = {}); Text(text = "Owner") }
+                            Row(verticalAlignment = Alignment.CenterVertically) { RadioButton(selected = false, onClick = {}); Text(text = "Other") }
+                        }
                         Spacers(12,"h")
-                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value =violation , onValueChange = {violation = it}, label = {Text(text = "Violation")}, modifier = Modifier.fillMaxWidth())
+                        DropdownOutlinedField(
+                            label = "Licence Type", options = listOf("LTV", "HTV", "PSV"),
+                            selectedOption ="LTV" ,
+                            onOptionSelected = {licenceSelectedOptions = it},
+                        )
                         Spacers(12,"h")
-                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value = fineAmount, onValueChange = {fineAmount = it}, label = {Text(text = "Fine Amount")}, modifier = Modifier.fillMaxWidth())
+                        Text(text = "Vehicle")
+                        HrLine()
+                        Spacers(12,"h")
+                        Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween){
+                            OutlinedTextField(shape = RoundedCornerShape(12.dp), value =vehicleRegistration, onValueChange = {vehicleRegistration = it }, label = {Text(text = "Vehicle Registration Number*", fontSize = 14.sp)}, modifier = Modifier.weight(2f).padding(2.dp))
+                            Box(modifier = Modifier.size(height = 58.dp, width = 40.dp).weight(0.7f).padding(1.dp).background(brush = Brush.linearGradient(btnColor), shape = RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center){ Text(text = "Verify", color = Color.White)}
+                        }
+                        Spacers(12,"h")
+                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value ="", onValueChange = {}, label = {Text(text = "Company")}, modifier = Modifier.fillMaxWidth())
+                        Spacers(12,"h")
+                        Text(text = "Violation(s)")
+                        HrLine()
+                        Spacers(12,"h")
+                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value = selectedViolations.joinToString("  ") , onValueChange = {}, label = {Text(text = "Violation")}, modifier = Modifier.fillMaxWidth(), readOnly = true, trailingIcon = {Icon(Icons.Default.ArrowDropDown, contentDescription = "", modifier = Modifier.clickable{showOffenseDialog = true})})
+                        Spacers(12,"h")
+                        Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween){
+                            OutlinedTextField(shape = RoundedCornerShape(12.dp), value =location, onValueChange = {location = it }, label = {Text(text = "Place of Ticket*")}, modifier = Modifier.weight(1.5f).padding(2.dp))
+                            Box(modifier = Modifier.size(height = 58.dp, width = 50.dp).weight(1f).padding(1.dp).background(brush = Brush.linearGradient(btnColor), shape = RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center){ Text(text = "Fetch Location", color = Color.White)}
+                        }
+                        Spacers(12,"h")
+                        Row (modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
+                            Row(verticalAlignment = Alignment.CenterVertically) { RadioButton(selected = true, onClick = {}); Text(text = "North") }
+                            Row (verticalAlignment = Alignment.CenterVertically){ RadioButton(selected = false, onClick = {}); Text(text = "South") }
+                        }
+                        Spacers(12,"h")
+                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value = fineTotal.toString(), onValueChange = {}, label = {Text(text = "Fine Amount")}, modifier = Modifier.fillMaxWidth())
                         Spacers(12,"h")
                         OutlinedTextField(shape = RoundedCornerShape(12.dp), value =officerName , onValueChange = {officerName = it}, label = {Text(text = "Patrolling Officer")}, modifier = Modifier.fillMaxWidth())
                         Spacers(12,"h")
@@ -245,4 +379,50 @@ fun TopBarDesign1(vehicle: String) {
         Text(text = "Issue Ticket for $vehicle", fontSize = 18.sp, color = Color.Gray)
     }
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropdownOutlinedField(
+    label: String,
+    options: List<String>,
+    selectedOption: String,
+    onOptionSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = selectedOption,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(item) },
+                    onClick = {
+                        onOptionSelected(item)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
 }

@@ -54,7 +54,27 @@ object TicketPdfGenerator {
             y += 16
         }
 
-        fun drawMixedLine(label: String, value: String) {
+//        fun drawMixedLine(label: String, value: String) {
+//            val labelPaint = Paint().apply {
+//                typeface = labelFont
+//                textSize = 10f
+//                color = Color.BLACK
+//            }
+//
+//            val valuePaint = Paint().apply {
+//                typeface = valueFont
+//                textSize = 10f
+//                color = Color.BLACK
+//            }
+//
+//            canvas.drawText(label, 10f, y.toFloat(), labelPaint)
+//            val labelWidth = labelPaint.measureText(label)
+//            canvas.drawText(value, 10f + labelWidth + 2f, y.toFloat(), valuePaint)
+//            y += 16
+//        }
+
+
+        fun drawWrappedLineWithLabel(label: String, value: String) {
             val labelPaint = Paint().apply {
                 typeface = labelFont
                 textSize = 10f
@@ -67,30 +87,59 @@ object TicketPdfGenerator {
                 color = Color.BLACK
             }
 
-            canvas.drawText(label, 10f, y.toFloat(), labelPaint)
+            val startX = 10f
+            val startY = y.toFloat()
             val labelWidth = labelPaint.measureText(label)
-            canvas.drawText(value, 10f + labelWidth + 2f, y.toFloat(), valuePaint)
-            y += 16
+            val maxWidth = pageWidth - startX - 10f // margin
+
+            // Combine label and value into one long string
+            val fullText = "$label$value"
+
+            val words = fullText.split(" ")
+            var currentLine = ""
+            var currentY = startY
+
+            for (word in words) {
+                val testLine = if (currentLine.isEmpty()) word else "$currentLine $word"
+                val paintToUse = if (currentLine.isEmpty() && word.startsWith(label.trim())) labelPaint else valuePaint
+                val lineWidth = valuePaint.measureText(testLine)
+
+                if (lineWidth <= maxWidth) {
+                    currentLine = testLine
+                } else {
+                    canvas.drawText(currentLine, startX, currentY, valuePaint)
+                    currentLine = word
+                    currentY += 14
+                }
+            }
+
+            if (currentLine.isNotEmpty()) {
+                canvas.drawText(currentLine, startX, currentY, valuePaint)
+                currentY += 14
+            }
+
+            y = currentY.toInt()
         }
+
 
         drawLine("       National Highway & Motorway Police")
         drawLine("           ${ticket.beat}")
         drawLine("")
 
-        drawMixedLine(" Ticket Number: ", ticket.ticketNumber)
-        drawMixedLine(" Date: ", ticket.date)
-        drawMixedLine(" Time: ", ticket.time)
-        drawMixedLine(" Location: ", ticket.location)
-        drawMixedLine(" Mode of Payment: ", ticket.paymentMode)
-        drawMixedLine(" Vehicle: ", ticket.vehicle)
-        drawMixedLine(" Driver's Name: ", ticket.driverName)
-        drawMixedLine(" CNIC: ", ticket.cnic)
-        drawMixedLine(" Contact Number: ", ticket.contactNumber)
-        drawMixedLine(" Licence: ", ticket.licence)
-        drawMixedLine(" Violation: ", ticket.violation)
-        drawMixedLine(" Document Confiscated: ", ticket.documentConfiscated)
-        drawMixedLine(" Fine Amount: ", ticket.fineAmount)
-        drawMixedLine(" Patrolling Officer: ", ticket.officerName)
+        drawWrappedLineWithLabel(" Ticket Number: ", ticket.ticketNumber)
+        drawWrappedLineWithLabel(" Date: ", ticket.date)
+        drawWrappedLineWithLabel(" Time: ", ticket.time)
+        drawWrappedLineWithLabel(" Location: ", ticket.location)
+        drawWrappedLineWithLabel(" Mode of Payment: ", ticket.paymentMode)
+        drawWrappedLineWithLabel(" Vehicle: ", ticket.vehicle)
+        drawWrappedLineWithLabel(" Driver's Name: ", ticket.driverName)
+        drawWrappedLineWithLabel(" CNIC: ", ticket.cnic)
+        drawWrappedLineWithLabel(" Contact Number: ", ticket.contactNumber)
+        drawWrappedLineWithLabel(" Licence: ", ticket.licence)
+        drawWrappedLineWithLabel(" Violation: ", ticket.violation)
+        drawWrappedLineWithLabel(" Document Confiscated: ", ticket.documentConfiscated)
+        drawWrappedLineWithLabel(" Fine Amount: ", ticket.fineAmount)
+        drawWrappedLineWithLabel(" Patrolling Officer: ", ticket.officerName)
 
         pdfDocument.finishPage(page)
 
