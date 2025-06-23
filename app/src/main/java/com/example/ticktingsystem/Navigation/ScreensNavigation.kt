@@ -11,31 +11,29 @@ import com.example.ticktingsystem.Screens.HomeScreen
 import com.example.ticktingsystem.Screens.InputFormScreen
 import com.example.ticktingsystem.Screens.LoginScreen
 import com.example.ticktingsystem.Screens.OutputScreen
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ScreensNavigation(navController: NavHostController) {
     NavHost(navController = navController, startDestination = "login_screen") {
         composable("login_screen") {
-//            LoginScreen()
-//            HomeScreen()
-//            ChooseVehiclesScreen()
-            InputFormScreen()
-//            OutputScreen()
+            LoginScreen(navController)
         }
         composable("home_screen") {
-            HomeScreen()
+            HomeScreen(navController)
         }
         composable("choose_vehicles_screen") {
-            ChooseVehiclesScreen()
+            ChooseVehiclesScreen(navController)
         }
-        composable("input_screen") {
-            InputFormScreen()
+        composable("input_screen/{name}") {backStackEntry->
+            val nameData = backStackEntry.arguments?.getString("name")
+            val decodedName = URLDecoder.decode(nameData, StandardCharsets.UTF_8.toString())
+            InputFormScreen(decodedName ?: "")
         }
         composable("output_screen") {
             OutputScreen()
         }
-
-
     }
 }

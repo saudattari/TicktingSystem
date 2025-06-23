@@ -2,6 +2,7 @@ package com.example.ticktingsystem.Screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,27 +10,34 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.ticktingsystem.R
+import com.example.ticktingsystem.ViewModel.TicketViewModel
 import com.example.ticktingsystem.utills.Spacing.Spacers
 import com.example.ticktingsystem.utills.Spacing.bold
 
 
-@Preview
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
+    val ticketViewModel: TicketViewModel = viewModel()
+    val total  = ticketViewModel.total.collectAsState()
     Scaffold { innerPadding->
         Box(modifier = Modifier.padding(innerPadding)){
             Column(modifier = Modifier.fillMaxWidth().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -40,13 +48,13 @@ fun HomeScreen() {
                         }
                         Spacers(12,"")
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "8", color = Color(0xFF1FDC01), fontWeight = bold, fontSize = 18.sp)
+                            Text(text = total.value.toString(), color = Color(0xFF1FDC01), fontWeight = bold, fontSize = 18.sp)
                             Text(text = "Tickets Issued", color = Color.Gray, fontSize = 18.sp)
                         }
                     }
                 }
                 Spacers(12,"h")
-                Card(modifier = Modifier, elevation = CardDefaults.cardElevation(defaultElevation = 3.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                Card(modifier = Modifier.clip(shape = RoundedCornerShape(12.dp)).clickable{navController.navigate("choose_vehicles_screen")}, elevation = CardDefaults.cardElevation(defaultElevation = 3.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
                     Column(modifier = Modifier.padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Image(painterResource(R.drawable.traffic_car), contentDescription = "", modifier = Modifier.size(100.dp))
                         Text(text = "Tickets Issued", color = Color.Gray, fontSize = 18.sp)

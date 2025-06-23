@@ -18,13 +18,20 @@ import java.io.FileOutputStream
 object TicketPdfGenerator {
 
     fun previewTicketAsPdf(context: Context, ticket: TicketData) {
+        val pageWidth = 300
+        val pageHeight = 800
+
         val pdfDocument = PdfDocument()
-        val pageInfo = PdfDocument.PageInfo.Builder(300, 600, 1).create()
+        val pageInfo = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, 1).create()
         val page = pdfDocument.startPage(pageInfo)
         val canvas = page.canvas
 
+        val mainFont = Typeface.createFromAsset(context.assets, "fonts/robotomono.ttf")
+        val labelFont = Typeface.createFromAsset(context.assets, "fonts/ocr.ttf")
+        val valueFont = Typeface.createFromAsset(context.assets, "fonts/bahnschrift2.ttf")
+
         val paint = Paint().apply {
-            typeface = Typeface.createFromAsset(context.assets, "fonts/robotomono.ttf")
+            typeface = mainFont
             textSize = 10f
             color = Color.BLACK
         }
@@ -34,11 +41,10 @@ object TicketPdfGenerator {
         try {
             val inputStream = context.assets.open("logo.png")
             val bitmap = BitmapFactory.decodeStream(inputStream)
-            val scaledBitmap = BitmapFactory.decodeStream(context.assets.open("logo.png")).let {
-                Bitmap.createScaledBitmap(it, 30, 30, false)
-            }
-            canvas.drawBitmap(scaledBitmap, 145f, y.toFloat(), null)
-            y += 50
+            val scaled = Bitmap.createScaledBitmap(bitmap, 30, 30, false)
+            val xCentered = (pageWidth - 30) / 2f
+            canvas.drawBitmap(scaled, xCentered, y.toFloat(), null)
+            y += 45
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -47,15 +53,16 @@ object TicketPdfGenerator {
             canvas.drawText(text, 10f, y.toFloat(), paint)
             y += 16
         }
+
         fun drawMixedLine(label: String, value: String) {
             val labelPaint = Paint().apply {
-                typeface = Typeface.createFromAsset(context.assets, "fonts/ocr.ttf")
+                typeface = labelFont
                 textSize = 10f
                 color = Color.BLACK
             }
 
             val valuePaint = Paint().apply {
-                typeface = Typeface.createFromAsset(context.assets, "fonts/bahnschrift2.ttf")
+                typeface = valueFont
                 textSize = 10f
                 color = Color.BLACK
             }
@@ -66,9 +73,10 @@ object TicketPdfGenerator {
             y += 16
         }
 
-        drawLine("        National Highway & Motorway Police")
-        drawLine("             ${ticket.beat}")
+        drawLine("       National Highway & Motorway Police")
+        drawLine("           ${ticket.beat}")
         drawLine("")
+
         drawMixedLine(" Ticket Number: ", ticket.ticketNumber)
         drawMixedLine(" Date: ", ticket.date)
         drawMixedLine(" Time: ", ticket.time)
@@ -86,7 +94,8 @@ object TicketPdfGenerator {
 
         pdfDocument.finishPage(page)
 
-        val file = File(context.cacheDir, "ticket_preview.pdf")
+        // Save in cache
+        val file = File(context.cacheDir, "ticket_preview_58mm.pdf")
         try {
             pdfDocument.writeTo(FileOutputStream(file))
             pdfDocument.close()

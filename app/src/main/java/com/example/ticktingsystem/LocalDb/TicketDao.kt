@@ -12,6 +12,6 @@ interface TicketDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTicket(ticket: TicketData)
 
-    @Query("SELECT * FROM tickets ORDER BY id DESC")
-    fun getAllTickets(): Flow<List<TicketData>>
+    @Query("SELECT COUNT(*) FROM tickets")
+    suspend fun getTotalTickets(): Int
 }

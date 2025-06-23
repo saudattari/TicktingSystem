@@ -8,19 +8,17 @@ import com.example.ticktingsystem.DataModel.TicketData
 import com.example.ticktingsystem.LocalDb.TicketDatabase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class TicketViewModel(application: Application): AndroidViewModel(application) {
     private val dao = TicketDatabase.getDatabase(application).ticketDao()
-
-    private val _allTickets = MutableStateFlow<List<TicketData>>(emptyList())
-    val allTickets: StateFlow<List<TicketData>> get() = _allTickets
+    private val _total = MutableStateFlow(0)
+    val total = _total.asStateFlow()
 
     init {
         viewModelScope.launch {
-            dao.getAllTickets().collect {
-                _allTickets.value = it
-            }
+            _total.value = dao.getTotalTickets()
         }
     }
 
