@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ticktingsystem.DataModel.TicketData
+import com.example.ticktingsystem.PrinterSetup.TicketPdfGenerator.previewTicketAsPdf
+import com.example.ticktingsystem.PrinterSetup.TicketPrinter
 import com.example.ticktingsystem.ViewModel.TicketViewModel
 import com.example.ticktingsystem.ViewModel.ViewModelFactory
 import com.example.ticktingsystem.utills.Spacing.HrLine
@@ -76,7 +78,7 @@ fun InputFormScreen() {
         val now = LocalDateTime.now()
         val formatterDate = DateTimeFormatter.ofPattern("dd MMM yyyy")
         val formatterTime = DateTimeFormatter.ofPattern("HH:mm:ss")
-        val formatterTicket = DateTimeFormatter.ofPattern("dd/MM/yyyy/HH/mm/ss")
+        val formatterTicket = DateTimeFormatter.ofPattern("dd/M/yy/HH/mm/ss")
         val autoDate = now.format(formatterDate)
         val autoTime= now.format(formatterTime)
         val autoTicketNumber = "4662/${now.format(formatterTicket)}"
@@ -136,7 +138,11 @@ fun InputFormScreen() {
                         Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.End) {
                             TextButton(onClick = { isSubmitted = false }) { Text("Cancel", color = MainColor) }
                             Spacer(modifier = Modifier.width(8.dp))
-                            TextButton(onClick = { isSubmitted = false; viewModel.insertTicket(ticketData) }) { Text("OK", color = MainColor) }
+                            TextButton(onClick = @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) {
+                                isSubmitted = false;
+                                viewModel.insertTicket(ticketData);
+                                previewTicketAsPdf(context, ticketData)
+                                TicketPrinter.printTicket(context, ticketData) }) { Text("OK", color = MainColor) }
                         }
                     }
                 }

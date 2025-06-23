@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ticktingsystem.DataModel.TicketData
 import com.example.ticktingsystem.LocalDb.TicketDatabase
-import com.example.ticktingsystem.LocalDb.TicketRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
