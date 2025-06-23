@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ticktingsystem.DataModel.TicketData
 import com.example.ticktingsystem.utills.Spacing.HrLine
 import com.example.ticktingsystem.utills.Spacing.MainColor
 import com.example.ticktingsystem.utills.Spacing.Spacers
@@ -48,7 +49,6 @@ fun OutputScreen() {
                         Text(text = "National Highway & Motorway Police", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
                         Spacers(5,"h")
                         HrLine()
-                        TicketDetails()
                     }
                 }, modifier = Modifier.fillMaxWidth())
             }
@@ -59,31 +59,49 @@ fun OutputScreen() {
 }
 
 @Composable
-fun TicketDetails() {
+fun TicketDetails(data: TicketData) {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
-        RowDetails()
-        RowDetails()
-        RowDetails()
-        RowDetails()
-        RowDetails()
-        RowDetails()
-        RowDetails()
-        RowDetails()
-        RowDetails()
-        RowDetails()
-        RowDetails()
-        RowDetails()
+        RowDetails(data.beat,"Beat Name:")
+        RowDetails(data.ticketNumber, "Ticket Number:")
+        RowDetails(data.date, "Date:")
+        RowDetails(data.time, "Time:")
+        RowDetails(data.location, "Location:")
+        RowDetails(data.paymentMode, "Mode of Payment:")
+        RowDetails(data.vehicle, "Vehicle:")
+        RowDetails(data.driverName, "Driver's Name:")
+        RowDetails(data.driverName, "Name:")
+        RowDetails(data.cnic, "CNIC:")
+        RowDetails(data.contactNumber, "Contact Number:")
+        RowDetails(data.licence, "Licence:")
+        RowDetails(data.violation, "Violation:")
+        RowDetails(data.documentConfiscated, "Document Confiscated:")
+        RowDetails(data.fineAmount, "Fine Amount:")
+        RowDetails(data.officerName, "Patrolling Officer:")
     }
 }
 
 @Composable
-fun RowDetails() {
-    Spacers(6,"h")
-    Row (modifier = Modifier.padding(top = 2.dp, start = 4.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically){
-        Text(text = "Beat Name:", fontSize = 16.sp, fontWeight = bold, color = Color.Black)
-        Spacer(modifier = Modifier.weight(1f))
-        Text(text = "Beat-26, South1, N5 South", fontSize = 14.sp)
+fun RowDetails(data: String, key: String) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top
+        ) {
+            Text(
+                text = key,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black,
+                modifier = Modifier.weight(2f)
+            )
+            Text(
+                text = data,
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.weight(1f),
+                maxLines = 1
+            )
+        }
+        HrLine()
     }
-    Spacers(6,"h")
-    HrLine()
 }

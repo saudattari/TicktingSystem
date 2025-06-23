@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -59,4 +60,9 @@ dependencies {
     val nav_version = "2.9.0"
 
     implementation("androidx.navigation:navigation-compose:$nav_version")
+    ksp("androidx.room:room-compiler:2.5.0")
+    val room_version = "2.7.2"
+
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation ("com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.3.0")
 }
