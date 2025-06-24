@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ScreensNavigation(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = "choose_vehicles_screen") {
+    NavHost(navController = navController, startDestination = "home_screen") {
         composable("login_screen") {
             LoginScreen(navController)
         }

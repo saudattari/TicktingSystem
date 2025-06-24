@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -23,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -38,26 +40,27 @@ import com.example.ticktingsystem.utills.Spacing.bold
 fun HomeScreen(navController: NavController) {
     val ticketViewModel: TicketViewModel = viewModel()
     val total  = ticketViewModel.total.collectAsState()
+    val lists = listOf("Tickets Issued", "Helps Given")
+    val lists2 = listOf("Tickets", "Helps Given","Helps Given","Helps Given")
     Scaffold { innerPadding->
         Box(modifier = Modifier.padding(innerPadding)){
-            Column(modifier = Modifier.fillMaxWidth().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Card(modifier = Modifier, elevation = CardDefaults.cardElevation(defaultElevation = 3.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-                    Row (modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically){
-                        Box(modifier = Modifier.size(50.dp).background(Color(0xFF1FDC01), shape = CircleShape), contentAlignment = Alignment.Center){
-                            Icon(painter = painterResource(R.drawable.ticket), contentDescription = "ticket", modifier = Modifier.size(30.dp), tint = Color.White)
-                        }
-                        Spacers(12,"")
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = total.value.toString(), color = Color(0xFF1FDC01), fontWeight = bold, fontSize = 18.sp)
-                            Text(text = "Tickets Issued", color = Color.Gray, fontSize = 18.sp)
-                        }
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+
+                LazyVerticalGrid(columns = GridCells.Adaptive(110.dp)) {
+                    items(lists) {
+                        DataFun(total.value, it)
                     }
                 }
-                Spacers(12,"h")
-                Card(modifier = Modifier.clip(shape = RoundedCornerShape(12.dp)).clickable{navController.navigate("choose_vehicles_screen")}, elevation = CardDefaults.cardElevation(defaultElevation = 3.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-                    Column(modifier = Modifier.padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Image(painterResource(R.drawable.traffic_car), contentDescription = "", modifier = Modifier.size(100.dp))
-                        Text(text = "Tickets Issued", color = Color.Gray, fontSize = 18.sp)
+                Spacers(20,"h")
+                LazyVerticalGrid(columns = GridCells.Adaptive(110.dp)) {
+                    items(lists2) {
+                        DataFun2(total.value, it){
+                            if(it == "Tickets"){
+                            navController.navigate("choose_vehicles_screen")
+                            }
+                        }
                     }
                 }
             }
@@ -65,4 +68,32 @@ fun HomeScreen(navController: NavController) {
 
     }
 
+}
+
+@Composable
+fun DataFun(value: Int, data: String) {
+    Card(modifier = Modifier.padding(4.dp), elevation = CardDefaults.cardElevation(defaultElevation = 3.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        Row (modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically){
+            Box(modifier = Modifier.size(30.dp).background(Color(0xFF1FDC01), shape = CircleShape), contentAlignment = Alignment.Center){
+                Icon(painter = painterResource(R.drawable.ticket), contentDescription = "ticket", modifier = Modifier.size(20.dp), tint = Color.White)
+            }
+            Spacers(8,"")
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = value.toString(), color = Color(0xFF1FDC01), fontWeight = bold, fontSize = 18.sp)
+                Text(text = data, color = Color.Gray, fontSize = if(data == "Tickets Issued"){14.sp}else{16.sp})
+            }
+        }
+    }
+}
+
+@Composable
+fun DataFun2(value: Int, data: String,onClick:(String)-> Unit) {
+    Card(modifier = Modifier.padding(4.dp)
+        .clip(shape = RoundedCornerShape(12.dp))
+        .clickable {onClick(data)}, elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        Column(modifier = Modifier.padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(painterResource(R.drawable.traffic_car), contentDescription = "", modifier = Modifier.size(100.dp))
+            Text(text = "Tickets", color = Color.Gray, fontSize = 18.sp)
+        }
+    }
 }

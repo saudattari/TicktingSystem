@@ -15,11 +15,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -49,6 +51,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -68,6 +71,7 @@ import com.example.ticktingsystem.utills.Spacing.MainColor
 import com.example.ticktingsystem.utills.Spacing.Spacers
 import com.example.ticktingsystem.utills.Spacing.bold
 import com.example.ticktingsystem.utills.Spacing.btnColor
+import com.example.ticktingsystem.utills.Spacing.btnColor2
 import com.example.ticktingsystem.utills.Spacing.offenseList
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -77,7 +81,7 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun InputFormScreen(vehicle1: String) {
-    var nationality by rememberSaveable { mutableStateOf("")  }
+    var nationality by rememberSaveable { mutableStateOf("Pakistani")  }
     var CNIC by rememberSaveable { mutableStateOf("")  }
     var license by rememberSaveable { mutableStateOf("")  }
     var name by rememberSaveable { mutableStateOf("")  }
@@ -88,34 +92,39 @@ fun InputFormScreen(vehicle1: String) {
     var violation by rememberSaveable { mutableStateOf("")  }
     var fineAmount by rememberSaveable { mutableStateOf("")  }
     var vehicle by rememberSaveable { mutableStateOf(vehicle1)  }
-    var officerName by rememberSaveable { mutableStateOf("")  }
-    var isSubmitted by rememberSaveable { mutableStateOf(false)  }
+    var officerName by rememberSaveable { mutableStateOf("") }
+    var isSubmitted by rememberSaveable { mutableStateOf(true) }
     var selectedViolations by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
     var fineTotal by rememberSaveable { mutableStateOf(0) }
     var vehicleRegistration by rememberSaveable { mutableStateOf("") }
     var showOffenseDialog by remember { mutableStateOf(false) }
     var showCustomPenaltyDialog by remember { mutableStateOf<Offense?>(null) }
-    var licenceSelectedOptions by rememberSaveable { mutableStateOf("") }
+    var licenceSelectedOptions by rememberSaveable { mutableStateOf("LTV") }
     val context = LocalContext.current
     var expanded by rememberSaveable { mutableStateOf(false) }
     val viewModel: TicketViewModel = viewModel(factory = ViewModelFactory(context.applicationContext as Application))
-
+    var northOrSouth by rememberSaveable { mutableStateOf("") }
+    var isNorth by rememberSaveable { mutableStateOf(false) }
+    var isSouth by rememberSaveable { mutableStateOf(false) }
+    var oneRepeat by rememberSaveable { mutableStateOf(0) }
+    var count by rememberSaveable { mutableStateOf(0) }
     if (showOffenseDialog) {
         AlertDialog(
             onDismissRequest = { showOffenseDialog = false },
             title = { Text("Select Offense") },
             text = {
                 LazyColumn {
-                    items(offenseList) { offense ->
+                    itemsIndexed(offenseList) {i, offense ->
                         Text(
-                            "${offense.code} ${offense.title} - ${offense.description} (${offense.minPenalty}${if (offense.minPenalty != offense.maxPenalty) "–${offense.maxPenalty}" else ""})",
+                            "${i+1}. ${offense.title} - ${offense.description} (${offense.minPenalty}${if (offense.minPenalty != offense.maxPenalty) "–${offense.maxPenalty}" else ""})",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
                                     if (offense.minPenalty != offense.maxPenalty) {
                                         showCustomPenaltyDialog = offense
                                     } else {
-                                        selectedViolations = selectedViolations + "${offense.code} ${offense.title} - ${offense.description} (${offense.minPenalty})"
+                                        count+=1
+                                        selectedViolations = selectedViolations + "${count}. ${offense.title} - ${offense.description} (${offense.minPenalty})"
                                         fineTotal += offense.minPenalty
                                     }
                                     showOffenseDialog = false
@@ -151,7 +160,8 @@ fun InputFormScreen(vehicle1: String) {
                     val amount = customAmount.toIntOrNull()
                     val offense = showCustomPenaltyDialog!!
                     if (amount != null && amount in offense.minPenalty..offense.maxPenalty) {
-                        selectedViolations = selectedViolations + "${offense.code} ${offense.title} - ${offense.description} (${amount})"
+                        count+=1
+                        selectedViolations = selectedViolations + "$count. ${offense.title} - ${offense.description} (${amount})"
                         fineTotal += amount
                         showCustomPenaltyDialog = null
                     }
@@ -186,12 +196,12 @@ fun InputFormScreen(vehicle1: String) {
             time = autoTime,
             location = location,
             paymentMode = modeOfPayment,
-            vehicle = vehicle1,
+            vehicle = "$vehicle1 ${if(vehicleRegistration.isNotEmpty()){vehicleRegistration}else{""}}",
             driverName = name,
             cnic = CNIC,
             contactNumber = contactNumber,
-            licence = license,
-            violation = violation,
+            licence = "$licenceSelectedOptions ${if(licenceSelectedOptions == "HTV"){license}else{""}}",
+            violation = selectedViolations.joinToString("  "),
             fineAmount = fineAmount,
             officerName = officerName,
             documentConfiscated = "None"
@@ -298,7 +308,7 @@ fun InputFormScreen(vehicle1: String) {
                         Spacers(12,"h")
                         DropdownOutlinedField(
                             label = "Licence Type", options = listOf("LTV", "HTV", "PSV"),
-                            selectedOption ="LTV" ,
+                            selectedOption =licenceSelectedOptions ,
                             onOptionSelected = {licenceSelectedOptions = it},
                         )
                         Spacers(12,"h")
@@ -315,7 +325,7 @@ fun InputFormScreen(vehicle1: String) {
                         Text(text = "Violation(s)")
                         HrLine()
                         Spacers(12,"h")
-                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value = selectedViolations.joinToString("  ") , onValueChange = {}, label = {Text(text = "Violation")}, modifier = Modifier.fillMaxWidth(), readOnly = true, trailingIcon = {Icon(Icons.Default.ArrowDropDown, contentDescription = "", modifier = Modifier.clickable{showOffenseDialog = true})})
+                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value = selectedViolations.joinToString("  \n") , onValueChange = {}, label = {Text(text = "Violation")}, modifier = Modifier.fillMaxWidth(), readOnly = true, trailingIcon = {Icon(Icons.Default.ArrowDropDown, contentDescription = "", modifier = Modifier.clickable{showOffenseDialog = true})})
                         Spacers(12,"h")
                         Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween){
                             OutlinedTextField(shape = RoundedCornerShape(12.dp), value =location, onValueChange = {location = it }, label = {Text(text = "Place of Ticket*")}, modifier = Modifier.weight(1.5f).padding(2.dp))
@@ -323,26 +333,53 @@ fun InputFormScreen(vehicle1: String) {
                         }
                         Spacers(12,"h")
                         Row (modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
-                            Row(verticalAlignment = Alignment.CenterVertically) { RadioButton(selected = true, onClick = {}); Text(text = "North") }
-                            Row (verticalAlignment = Alignment.CenterVertically){ RadioButton(selected = false, onClick = {}); Text(text = "South") }
+                            Row(verticalAlignment = Alignment.CenterVertically) { RadioButton(selected = isNorth, onClick = {isNorth = !isNorth;oneRepeat = 1}); Text(text = "North") }
+                            Row (verticalAlignment = Alignment.CenterVertically){ RadioButton(selected = isSouth, onClick = {isSouth = !isSouth;oneRepeat = 1}); Text(text = "South") }
+                        }
+                        if(location.isNotEmpty()){
+                            if(oneRepeat == 1){
+                                if(isNorth){
+                                    oneRepeat = 2
+                                    location += "- N"
+                                }else if(isSouth){
+                                    oneRepeat = 2
+                                    location += " - S"
+                                }
+                            }
                         }
                         Spacers(12,"h")
-                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value = fineTotal.toString(), onValueChange = {}, label = {Text(text = "Fine Amount")}, modifier = Modifier.fillMaxWidth())
+                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value = fineTotal.toString(), onValueChange = {fineAmount = fineTotal.toString()}, label = {Text(text = "Fine Amount")}, modifier = Modifier.fillMaxWidth())
+
                         Spacers(12,"h")
                         OutlinedTextField(shape = RoundedCornerShape(12.dp), value =officerName , onValueChange = {officerName = it}, label = {Text(text = "Patrolling Officer")}, modifier = Modifier.fillMaxWidth())
                         Spacers(12,"h")
-                        Button(onClick = {
-                            if (!isFieldNotEmpty(nationality, CNIC, license, name, address, contactNumber, location, violation, fineAmount, vehicle, officerName)) {
+//                        Button(onClick = {
+//                            fineAmount = fineTotal.toString()
+//                            if (!isFieldNotEmpty(nationality, CNIC, license, name, address, contactNumber, location, violation, fineAmount, vehicle, officerName)) {
+//                                Toast.makeText(context, "Please fill all required fields.", Toast.LENGTH_SHORT).show()
+//                                return@Button
+//                            }
+//
+//                            if (!isValidCNIC(CNIC)) {
+//                                Toast.makeText(context, "Invalid CNIC format. Correct format: 35201-1234567-1", Toast.LENGTH_SHORT).show()
+//                                return@Button
+//                            }
+//
+//                            isSubmitted = true}, colors = ButtonDefaults.buttonColors(containerColor = MainColor)) {Text(text = "Submit") }
+                        Box(modifier = Modifier.fillMaxWidth().height(80.dp).padding(12.dp).background(brush = Brush.linearGradient(btnColor2), shape = RoundedCornerShape(8.dp)).clip(shape = RoundedCornerShape(8.dp)).clickable{
+                            fineAmount = fineTotal.toString()
+                            if (!isFieldNotEmpty(nationality, CNIC, license, name, address, contactNumber, location,  fineAmount, vehicle, officerName)) {
                                 Toast.makeText(context, "Please fill all required fields.", Toast.LENGTH_SHORT).show()
-                                return@Button
+                                return@clickable
                             }
 
                             if (!isValidCNIC(CNIC)) {
                                 Toast.makeText(context, "Invalid CNIC format. Correct format: 35201-1234567-1", Toast.LENGTH_SHORT).show()
-                                return@Button
+                                return@clickable
                             }
+                            isSubmitted = true
+                        }, contentAlignment = Alignment.Center){ Text(text = "Issue Ticket", color = Color.White)}
 
-                            isSubmitted = true}, colors = ButtonDefaults.buttonColors(containerColor = MainColor)) {Text(text = "Submit") }
 
                     }
                 }
@@ -406,6 +443,7 @@ fun DropdownOutlinedField(
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
             modifier = Modifier
+//                .menuAnchor(type, enabled)
                 .menuAnchor()
                 .fillMaxWidth()
         )

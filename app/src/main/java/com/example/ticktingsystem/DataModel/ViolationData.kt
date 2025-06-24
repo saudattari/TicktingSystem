@@ -5,5 +5,4 @@ data class Offense(
     val description: String,
     val minPenalty: Int,
     val maxPenalty: Int,
-    val code: String
 )
