@@ -124,7 +124,7 @@ fun InputFormScreen(vehicle1: String) {
                                         showCustomPenaltyDialog = offense
                                     } else {
                                         count+=1
-                                        selectedViolations = selectedViolations + "${count}. ${offense.title} - ${offense.description} (${offense.minPenalty})"
+                                        selectedViolations = selectedViolations + "${count}. ${offense.title} - ${offense.description}. - ${offense.minPenalty}"
                                         fineTotal += offense.minPenalty
                                     }
                                     showOffenseDialog = false
@@ -161,7 +161,7 @@ fun InputFormScreen(vehicle1: String) {
                     val offense = showCustomPenaltyDialog!!
                     if (amount != null && amount in offense.minPenalty..offense.maxPenalty) {
                         count+=1
-                        selectedViolations = selectedViolations + "$count. ${offense.title} - ${offense.description} (${amount})"
+                        selectedViolations = selectedViolations + "$count. ${offense.title} - ${offense.description}. - $amount"
                         fineTotal += amount
                         showCustomPenaltyDialog = null
                     }
@@ -201,7 +201,7 @@ fun InputFormScreen(vehicle1: String) {
             cnic = CNIC,
             contactNumber = contactNumber,
             licence = "$licenceSelectedOptions ${if(licenceSelectedOptions == "HTV"){license}else{""}}",
-            violation = selectedViolations.joinToString("  "),
+            violation = selectedViolations.joinToString("\n"),
             fineAmount = fineAmount,
             officerName = officerName,
             documentConfiscated = "None"

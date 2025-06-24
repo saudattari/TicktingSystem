@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "71202800408",
+    "firebase_url": "https://medicine-reminder-179df-default-rtdb.firebaseio.com",
+    "project_id": "medicine-reminder-179df",
+    "storage_bucket": "medicine-reminder-179df.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:71202800408:android:08dd5450a81546cf41d46d",
+        "android_client_info": {
+          "package_name": "com.example.medicinereminder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtSKhZopyvn4j8YTtozypVSNIQT3jROpM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:71202800408:android:7b59ec384dacfe2a41d46d",
+        "android_client_info": {
+          "package_name": "com.example.ticktingsystem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtSKhZopyvn4j8YTtozypVSNIQT3jROpM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

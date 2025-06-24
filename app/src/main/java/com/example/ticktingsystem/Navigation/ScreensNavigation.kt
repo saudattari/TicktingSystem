@@ -11,6 +11,7 @@ import com.example.ticktingsystem.Screens.HomeScreen
 import com.example.ticktingsystem.Screens.InputFormScreen
 import com.example.ticktingsystem.Screens.LoginScreen
 import com.example.ticktingsystem.Screens.OutputScreen
+import com.example.ticktingsystem.Screens.WhiteScreen
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -23,6 +24,9 @@ fun ScreensNavigation(navController: NavHostController) {
         }
         composable("home_screen") {
             HomeScreen(navController)
+        }
+        composable("white_screen") {
+            WhiteScreen(navController)
         }
         composable("choose_vehicles_screen") {
             ChooseVehiclesScreen(navController)
