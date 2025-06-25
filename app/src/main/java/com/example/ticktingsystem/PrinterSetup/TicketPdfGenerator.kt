@@ -76,7 +76,7 @@ object TicketPdfGenerator {
     fun previewTicketAsPdf(context: Context, ticket: TicketData) {
         val pdfDocument = PdfDocument()
         val pageWidth = 300
-        val pageHeight = 550
+        val pageHeight = 650
         val pageInfo = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, 1).create()
         val page = pdfDocument.startPage(pageInfo)
         val canvas = page.canvas

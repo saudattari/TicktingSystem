@@ -93,7 +93,7 @@ fun InputFormScreen(vehicle1: String) {
     var fineAmount by rememberSaveable { mutableStateOf("")  }
     var vehicle by rememberSaveable { mutableStateOf(vehicle1)  }
     var officerName by rememberSaveable { mutableStateOf("") }
-    var isSubmitted by rememberSaveable { mutableStateOf(true) }
+    var isSubmitted by rememberSaveable { mutableStateOf(false) }
     var selectedViolations by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
     var fineTotal by rememberSaveable { mutableStateOf(0) }
     var vehicleRegistration by rememberSaveable { mutableStateOf("") }
@@ -200,7 +200,7 @@ fun InputFormScreen(vehicle1: String) {
             driverName = name,
             cnic = CNIC,
             contactNumber = contactNumber,
-            licence = "$licenceSelectedOptions ${if(licenceSelectedOptions == "HTV"){license}else{""}}",
+            licence = "$licenceSelectedOptions $license",
             violation = selectedViolations.joinToString("\n"),
             fineAmount = fineAmount,
             officerName = officerName,
@@ -269,7 +269,7 @@ fun InputFormScreen(vehicle1: String) {
                             Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(checked = true, onCheckedChange = {}, colors = CheckboxDefaults.colors(checkedColor = MainColor));Text(text = "Licence") }
                         }
                         Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween){
-                            OutlinedTextField(shape = RoundedCornerShape(12.dp), value =CNIC, onValueChange = {CNIC = formatCNIC(it) }, isError = CNIC.isNotEmpty() && !isValidCNIC(CNIC), label = {Text(text = "CNIC*")}, modifier = Modifier.weight(1.8f).padding(2.dp))
+                            OutlinedTextField(shape = RoundedCornerShape(12.dp), value =CNIC, onValueChange = {CNIC = formatCNIC(it) }, keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number), isError = CNIC.isNotEmpty() && !isValidCNIC(CNIC), label = {Text(text = "CNIC*")}, modifier = Modifier.weight(1.8f).padding(2.dp))
                             Box(modifier = Modifier.size(height = 58.dp, width = 45.dp).weight(0.7f).padding(1.dp).background(brush = Brush.linearGradient(btnColor), shape = RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center){ Text(text = "Scan", color = Color.White)}
                             Box(modifier = Modifier.size(height = 58.dp, width = 45.dp).weight(0.7f).padding(1.dp).background(brush = Brush.linearGradient(btnColor), shape = RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center){ Text(text = "Verify",color = Color.White)}
                         }
@@ -292,7 +292,7 @@ fun InputFormScreen(vehicle1: String) {
                         Spacers(12,"h")
                         OutlinedTextField(shape = RoundedCornerShape(12.dp), value =vehicle , onValueChange = {vehicle = it}, label = {Text(text = "Vehicle*")}, modifier = Modifier.fillMaxWidth())
                         Spacers(12,"h")
-                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value =contactNumber , onValueChange = {contactNumber = it}, label = {Text(text = "Contact Number*")}, modifier = Modifier.fillMaxWidth())
+                        OutlinedTextField(shape = RoundedCornerShape(12.dp), value =contactNumber , onValueChange = {if (it.length <= 11 && it.all { char -> char.isDigit() }) { contactNumber = it }}, keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number), label = {Text(text = "Contact Number*")}, modifier = Modifier.fillMaxWidth())
                         Spacers(12,"h")
                         Row (modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
                             Row(verticalAlignment = Alignment.CenterVertically) { RadioButton(selected = true, onClick = {}); Text(text = "Male") }
@@ -340,10 +340,10 @@ fun InputFormScreen(vehicle1: String) {
                             if(oneRepeat == 1){
                                 if(isNorth){
                                     oneRepeat = 2
-                                    location += "- N"
+                                    location += " N"
                                 }else if(isSouth){
                                     oneRepeat = 2
-                                    location += " - S"
+                                    location += " S"
                                 }
                             }
                         }
@@ -410,7 +410,9 @@ fun isFieldNotEmpty(vararg fields: String): Boolean {
 
 @Composable
 fun TopBarDesign1(vehicle: String) {
-    Row(modifier = Modifier.fillMaxWidth().padding(top = 26.dp, bottom = 12.dp).shadow(elevation = 1.dp).padding(12.dp), verticalAlignment = Alignment.CenterVertically){
+    Row(modifier = Modifier.fillMaxWidth().padding(top = 26.dp, bottom = 12.dp)
+//        .shadow(elevation = 1.dp)
+        .padding(12.dp), verticalAlignment = Alignment.CenterVertically){
         Icon(imageVector = Icons.Default.Menu, contentDescription = "", tint = Color.Gray)
         Spacers(12,"")
         Text(text = "Issue Ticket for $vehicle", fontSize = 18.sp, color = Color.Gray)

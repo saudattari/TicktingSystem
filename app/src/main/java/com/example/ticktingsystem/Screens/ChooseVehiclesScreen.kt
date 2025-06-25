@@ -49,7 +49,7 @@ import java.nio.charset.StandardCharsets
 fun ChooseVehiclesScreen(navController: NavController) {
     Scaffold(topBar = {TopBarDesign()}) { innerPadding->
         Box(modifier = Modifier
-            .fillMaxSize()
+//            .fillMaxSize()
             .padding(innerPadding).background(Color.White.copy(alpha = 0.1f))){
             LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 90.dp)) {
                 items(dataList) {
@@ -65,7 +65,10 @@ fun ChooseVehiclesScreen(navController: NavController) {
 @Preview
 @Composable
 fun TopBarDesign() {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 18.dp).shadow(elevation = 1.dp).padding(10.dp), verticalAlignment = Alignment.CenterVertically){
+    Row(modifier = Modifier.fillMaxWidth().padding(top = 22.dp)
+//        .shadow(elevation = 1.dp)
+        .padding(10.dp)
+        , verticalAlignment = Alignment.CenterVertically){
         Icon(imageVector = Icons.Default.Menu, contentDescription = "", tint = Color.Gray)
         Spacers(12,"")
         Text(text = "Ticket", fontSize = 18.sp, color = Color.Gray)

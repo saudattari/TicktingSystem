@@ -7,6 +7,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.ticktingsystem.DataModel.Offense
@@ -31,6 +33,9 @@ object Spacing {
     fun HrLine(){
         HorizontalDivider(color = Color(0xFF1E88E5), thickness = 1.dp)
     }
+
+    //fontFamily
+    val regular = FontFamily(Font(R.font.regular))
 
     //fonts
     val bold = FontWeight.Bold
@@ -124,6 +129,26 @@ object Spacing {
         Offense("B76", "Parking on grass verge", 750, 750),
         Offense("C21", "Any other offence", 500, 500),
         Offense("C22", "Repetition of C21", 1000, 1000)
+    )
+    data class twoCard(
+        val icon:Int,
+        val color: Color,
+        val value: Int= 0,
+        val text : String
+    )
+    data class twoCard1(
+        val icon:Int,
+        val text : String
+    )
+    val lists = listOf(
+        twoCard(icon = R.drawable.ticket, color = Color(0xFF37CA5D), value = 0, text = "Tickets Issued"),
+        twoCard(icon = R.drawable.aid, color = Color(0xFF628FFB), value = 0, text = "Helps Given"))
+    val lists2 = listOf(
+        twoCard1(icon = R.drawable.traffic_car, text = "Tickets")
+        , twoCard1(icon = R.drawable.warning, "Briefing/Warning")
+        , twoCard1(icon = R.drawable.help, "Help")
+        , twoCard1(icon = R.drawable.verify, "Data Verification")
+
     )
 
 
