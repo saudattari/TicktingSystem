@@ -1,7 +1,9 @@
 package com.example.ticktingsystem.Screens
 
 import android.Manifest
+import android.app.Activity
 import android.app.Application
+import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -60,9 +62,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dantsu.escposprinter.connection.bluetooth.BluetoothConnection
 import com.example.ticktingsystem.DataModel.Offense
 import com.example.ticktingsystem.DataModel.TicketData
+import com.example.ticktingsystem.PrinterSetup.BluetoothPrinterHandler
 import com.example.ticktingsystem.PrinterSetup.TicketPdfGenerator.previewTicketAsPdf
 import com.example.ticktingsystem.ViewModel.TicketViewModel
 import com.example.ticktingsystem.ViewModel.ViewModelFactory
@@ -247,9 +253,8 @@ fun InputFormScreen(vehicle1: String) {
                             Spacer(modifier = Modifier.width(8.dp))
                             TextButton(onClick = @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT) {
                                 isSubmitted = false;
-                                viewModel.insertTicket(ticketData);
-                                previewTicketAsPdf(context, ticketData)
-//                                TicketPrinter.printTicket(context, ticketData)
+                                BluetoothPrinterHandler.printTicketIfAvailable(context, ticketData)
+                                viewModel.insertTicket(ticketData)
                             }) { Text("OK", color = MainColor) }
                         }
                     }
@@ -466,3 +471,4 @@ fun DropdownOutlinedField(
         }
     }
 }
+
