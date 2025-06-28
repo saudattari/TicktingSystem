@@ -6,7 +6,12 @@ import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.os.Build
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -45,9 +50,10 @@ object BluetoothPrinterHandler {
             try {
                 val printer = EscPosPrinter(printerConnection, 203, 57f, 32)
 
+
                 val logo = try {
                     val bmp = BitmapFactory.decodeStream(context.assets.open("logo2.jpg"))
-                    val scaled = bmp.scale(70, 70, false) // Half inch approx
+                    val scaled = bmp.scale(85, 85, false) // Half inch approx
                     "[C]<img>${PrinterTextParserImg.bitmapToHexadecimalString(printer, scaled)}</img>\n"
                 } catch (e: Exception) {
                     ""
@@ -55,7 +61,7 @@ object BluetoothPrinterHandler {
 
                 val qr = try {
                     val bmp = BitmapFactory.decodeStream(context.assets.open("qr.jpg"))
-                    val scaled = bmp.scale(180, 180, false) // 1 inch approx
+                    val scaled = bmp.scale(225, 225, false) // 1 inch approx
                     "[C]<img>${PrinterTextParserImg.bitmapToHexadecimalString(printer, scaled)}</img>\n"
                 } catch (e: Exception) {
                     ""
@@ -64,37 +70,132 @@ object BluetoothPrinterHandler {
                 val formattedText = buildString {
                     append(logo)
                     append("[L]\n")
-                    append("[C]National Highway & Motorway Police\n")
-                    append("[C]${ticketData.beat}\n")
-                    append("[L]\n")
+                    append(bitmapLine(printer, context, "National Highway & Motorway Police", 19f, true, true))
+                    append(bitmapLine(printer, context, "", 16f, true))
+                    append(bitmapLine(printer, context, ticketData.beat, 16f, true))
+                    append("\n")
 
-                    append("[L]Ticket Number: ${ticketData.ticketNumber}\n")
-                    append("[L]Date: ${ticketData.date}\n")
-                    append("[L]Time: ${ticketData.time}\n")
-                    append("[L]Location: ${ticketData.location}\n")
-                    append("[L]Mode of Payment: ${ticketData.paymentMode}\n")
-                    append("[L]Vehicle: ${ticketData.vehicle}\n")
-                    append("[L]Driver's Name: ${ticketData.driverName}\n")
-                    append("[L]CNIC: ${ticketData.cnic}\n")
-                    append("[L]Contact Number: ${ticketData.contactNumber}\n")
-                    append("[L]License: ${ticketData.licence}\n")
+                    append(bitmapLine(printer, context, "Ticket Number: ${ticketData.ticketNumber}", 16f, heightScale = 2.0f))
+                    append(bitmapLine(printer, context, "Date: ${ticketData.date}", 18f, heightScale = 2.0f))
+                    append(bitmapLine(printer, context, "Time: ${ticketData.time}", 18f, heightScale = 2.0f))
+                    append(bitmapLine(printer, context, "Location: ${ticketData.location}", 18f, heightScale = 2.0f))
+                    append(bitmapLine(printer, context, "Mode of Payment: ${ticketData.paymentMode}", 18f, heightScale = 2.0f))
+                    append(bitmapLine(printer, context, "Vehicle: ${ticketData.vehicle}", 18f, heightScale = 2.0f))
+                    append(bitmapLine(printer, context, "Driver's Name: ${ticketData.driverName}", 18f, heightScale = 2.0f))
+                    append(bitmapLine(printer, context, "CNIC: ${ticketData.cnic}", 18f, heightScale = 2.0f))
+                    append(bitmapLine(printer, context, "Contact Number: ${ticketData.contactNumber}", 18f, heightScale = 2.0f))
+                    append(bitmapLine(printer, context, "License: ${ticketData.licence}", 18f, heightScale = 2.0f))
 
-                    append("[L]Violation: ${formatViolationsInline(ticketData.violation)}\n")
-                    append("[L]Document Confiscated: ${ticketData.documentConfiscated}\n")
-                    append("[L]Fine Amount: ${ticketData.fineAmount}\n")
-                    append("[L]Patrolling Officer: ${ticketData.officerName}\n")
+//                    append("[L]Violation: ${formatViolationsInline(ticketData.violation)}\n")
+//                    append(bitmapLine(printer, context, "Violation: ${formatViolations(ticketData.violation)}", 18f))
+                    append(bitmapLine(printer, context, "Violation: ${formatViolations(ticketData.violation)}", 18f, heightScale = 2.0f))
+                    append(bitmapLine(printer, context, "Document Confiscated: ${ticketData.documentConfiscated}", 18f, heightScale = 2.0f))
+                    append(bitmapLine(printer, context, "Fine Amount: ${ticketData.fineAmount}", 18f, heightScale = 2.0f))
+                    append(bitmapMultiline(printer, context, "Patrolling Officer", ticketData.officerName, 16f, heightScale = 2.0f))
+//                    append(bitmapLine(printer, context, "Patrolling Officer: ${ticketData.officerName}", 16f))
 
                     append("[L]\n")
                     append(qr)
                 }
-
                 printer.printFormattedTextAndCut(formattedText)
-
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(context, "Print failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    private fun bitmapMultiline(
+        printer: EscPosPrinter,
+        context: Context,
+        title: String,
+        content: String,
+        textSize: Float,
+        bold: Boolean = false,
+        heightScale: Float = 1.3f
+    ): String {
+        val paint = Paint().apply {
+            color = Color.BLACK
+            this.textSize = textSize
+            isAntiAlias = true
+            typeface = if (bold) Typeface.DEFAULT_BOLD else Typeface.MONOSPACE
+        }
+
+        val width = printer.printerWidthPx
+        val padding = 12
+        val contentText = "$title $content"
+
+        // Word wrapping logic
+        val lines = mutableListOf<String>()
+        var currentLine = ""
+        for (word in contentText.split(" ")) {
+            val testLine = if (currentLine.isEmpty()) word else "$currentLine $word"
+            if (paint.measureText(testLine) < width - padding * 2) {
+                currentLine = testLine
+            } else {
+                lines.add(currentLine)
+                currentLine = word
+            }
+        }
+        if (currentLine.isNotEmpty()) lines.add(currentLine)
+
+        val lineHeight = (textSize + padding)
+        val bitmapHeight = (lineHeight * lines.size * heightScale).toInt()
+        val bitmap = Bitmap.createBitmap(width, bitmapHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        canvas.drawColor(Color.WHITE)
+
+        var y = textSize + padding / 2
+        for (line in lines) {
+            canvas.drawText(line.trim(), 10f, y, paint)
+            y += lineHeight * heightScale
+        }
+
+        val hex = PrinterTextParserImg.bitmapToHexadecimalString(printer, bitmap, false)
+        return "[C]<img>$hex</img>\n"
+    }
+
+
+    private fun bitmapLine(
+        printer: EscPosPrinter,
+        context: Context,
+        text: String,
+        textSize: Float,
+        center: Boolean = false,
+        bold: Boolean = false,
+        heightScale: Float = 1.5f
+    ): String {
+        val paint = Paint().apply {
+            color = Color.BLACK
+            this.textSize = textSize
+            isAntiAlias = true
+            typeface = if (bold) Typeface.DEFAULT_BOLD else Typeface.MONOSPACE
+        }
+
+        val padding = 10
+        val width = printer.printerWidthPx
+        val textHeight = (textSize + padding * 2).toInt()
+        val height = (textHeight * heightScale).toInt()
+
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        canvas.drawColor(Color.WHITE)
+
+        val x = if (center) {
+            (width - paint.measureText(text)) / 2
+        } else {
+            10f
+        }
+        val y = textSize + padding
+
+        canvas.drawText(text, x, y, paint)
+
+        val hexImage = PrinterTextParserImg.bitmapToHexadecimalString(printer, bitmap, false)
+        return "[C]<img>$hexImage</img>\n"
+    }
+
+    private fun formatViolations(raw: String): String {
+        return raw.replace("\n", "  ").replace(Regex("\\s+"), " ")
     }
 
     private fun formatViolationsInline(text: String): String {
@@ -105,9 +206,9 @@ object BluetoothPrinterHandler {
         val builder = StringBuilder()
         lines.forEachIndexed { index, line ->
             if (index == 0) {
-                builder.append("${index + 1}. $line")
+                builder.append(line)
             } else {
-                builder.append("\n${index + 1}. $line")
+                builder.append("\n$line")
             }
         }
         return builder.toString()
